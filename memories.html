@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mirror of Memories</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ffe6f0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #d63384;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .photo-card {
+      width: 300px;
+      height: 400px;
+      background-color: #fff0f5;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      text-align: center;
+    }
+
+    .photo-card:hover {
+      transform: scale(1.03);
+    }
+
+    .photo-card span {
+      font-size: 20px;
+      color: #c2185b;
+      padding: 20px;
+    }
+
+    .slider-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px; /* space between image, message, and button */
+  margin-top: 20px;
+}
+    .slider-container {
+      display: none;
+      margin-top: 30px;
+      width: 90%;
+      max-width: 350px;
+      position: relative;
+    }
+
+   .slider-container img {
+  width: 100%;
+  max-height: 400px; /* optional max size */
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(255, 255, 255, 0.8);
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    .prev-btn {
+      left: -15px;
+    }
+
+    .next-btn {
+      right: -15px;
+    }
+
+
+    @keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s ease forwards;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease forwards;
+}
+
+.balloon-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1; /* behind everything */
+  pointer-events: none;
+}
+
+.balloon {
+  position: absolute;
+  width: 60px;
+  height: 80px;
+  background: url('balloon.png') no-repeat center center / contain;
+  animation: floatUp linear infinite;
+  opacity: 0.9;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(100vh) scale(1);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-120vh) scale(1.2);
+    opacity: 0;
+  }
+}
+
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+.typing-message {
+  font-size: 22px;
+  color: #d63384;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 2px solid #d63384;
+  width: 0;
+  animation: typing 5s steps(40, end) forwards, blink-caret 0.75s step-end infinite;
+  text-align: center;
+}
+
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  0%, 100% {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #d63384;
+  }
+}
+
+.celebrate-button {
+  margin: 20px auto 0; /* top margin + center horizontally */
+  padding: 12px 24px;
+  font-size: 18px;
+  background-color: #d63384;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: none;
+  display: block;         /* <-- this ensures it takes full width space */
+  text-align: center;     /* center text inside */
+}
+
+
+.celebrate-button:hover {
+  background-color: #ad1457;
+  transform: scale(1.05);
+}
+
+
+  </style>
+</head>
+<body>
+
+  <h1>Mirror of Memories</h1>
+
+  <div class="balloon-container" aria-hidden="true"></div>
+
+
+  <div class="photo-card" onclick="unlockMemories()">
+    <span>Click to unlock memories ✨</span>
+  </div>
+
+  <div class="slider-container" id="sliderContainer">
+  <button class="nav-btn prev-btn" onclick="changeSlide(-1)">&#10094;</button>
+  <img id="sliderImage" src="1.jpg" alt="Memory Photo">
+
+  <!-- 🎯 Centered wrapper for both message and button -->
+  <div class="message-wrapper">
+    <div id="birthdayMessage" class="typing-message" style="display: none;">
+      Happy Birthday Bhai 🎉❤️
+    </div>
+    <button id="celebrateBtn" class="celebrate-button"  onclick="window.location.href='cake.html'" >Let's Celebrate 🎊</button>
+  </div>
+
+  <button class="nav-btn next-btn" onclick="changeSlide(1)">&#10095;</button>
+</div>
+
+
+  <script>
+  const images = [
+    "1.jpg",
+    "2.jpg",
+    "3.jpg",
+    "4.jpg",
+    "5.jpg",
+    "6.jpg",
+    "7.jpg",
+    "8.jpg",
+    "9.jpg",
+    "10.jpg",
+    "11.jpg",
+    "12.jpg"
+  ];
+  let current = 0;
+  let autoSlideInterval;
+
+  function unlockMemories() {
+  document.querySelector('.photo-card').style.display = 'none';
+  document.getElementById('sliderContainer').style.display = 'block';
+
+  // Show typing message
+  setTimeout(() => {
+    document.getElementById('birthdayMessage').style.display = 'block';
+    document.getElementById('celebrateBtn').style.display = 'inline-block';
+  }, 500); // Show both after 0.5s
+
+  startAutoSlide();
+}
+
+
+  function changeSlide(direction) {
+    const img = document.getElementById('sliderImage');
+
+    // Remove previous animation classes
+    img.classList.remove('slide-in-right', 'slide-in-left');
+
+    // Update index
+    current += direction;
+    if (current >= images.length) current = 0;
+    if (current < 0) current = images.length - 1;
+
+    // Add animation class
+    if (direction === 1) {
+      img.classList.add('slide-in-right');
+    } else {
+      img.classList.add('slide-in-left');
+    }
+
+    // Update image
+    img.src = images[current];
+  }
+
+  function autoSlide() {
+    changeSlide(1); // Move to next with animation
+  }
+
+  function startAutoSlide() {
+    autoSlideInterval = setInterval(autoSlide, 1000); // every 4 seconds
+  }
+
+
+    const container = document.querySelector('.balloon-container');
+
+  function createBalloon() {
+    const balloon = document.createElement('div');
+    balloon.classList.add('balloon');
+
+    // Random horizontal position
+    balloon.style.left = Math.random() * 100 + 'vw';
+    // Random delay and duration
+    balloon.style.animationDuration = (4 + Math.random() * 3) + 's';
+    balloon.style.animationDelay = Math.random() * 5 + 's';
+
+    container.appendChild(balloon);
+
+    // Remove after animation
+    setTimeout(() => {
+      balloon.remove();
+    }, 8000);
+  }
+
+  // Create balloons repeatedly
+  setInterval(createBalloon, 700);
+
+
+  
+
+</script>
+
+
+</body>
+</html>
